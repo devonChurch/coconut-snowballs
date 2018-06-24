@@ -18,5 +18,9 @@
   "bugs": {
     "url": "https://github.com/devonChurch/coconut-snowballs/issues"
   },
-  "homepage": "https://github.com/devonChurch/coconut-snowballs#readme"
+  "homepage": "https://github.com/devonChurch/coconut-snowballs#readme",
+  "dependencies": {
+    "args": "^5.0.0",
+    "consola": "^1.4.1"
+  }
 }
