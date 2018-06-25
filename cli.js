@@ -7,6 +7,10 @@ const fs = require("fs");
 const readFileAsync = promisify(fs.readFile);
 const readdirAsync = promisify(fs.readdir);
 const logger = require("consola").withScope("translation");
+const findMarkdownFiles = require("./find-markdown-files");
+const readMarkdownData = require("./read-markdown-data");
+const extractMarkdownExamples = require("./extract-markdown-examples");
+const newLine = () => console.log("\n");
 
 // logger.fatal("this is a fatal message");
 // logger.error("this is a error message");
@@ -31,19 +35,49 @@ args
     "root directory where the generated styleguidist index.html lives"
   );
 
-const flags = args.parse(process.argv);
+const { markdown: markdownFlag, styleguidist: styleguidistFlag } = args.parse(
+  process.argv
+);
 
-// console.log("flags", flags);
+!markdownFlag && logger.error("--markdown flag must be supplied");
+!styleguidistFlag && logger.error("--styleguidist flag must be supplied");
 
-!flags.markdown && logger.error("--markdown flag must be supplied");
-!flags.styleguidist && logger.error("--styleguidist flag must be supplied");
+if (!markdownFlag && !styleguidistFlag) return;
 
-if (!flags.markdown && !flags.styleguidist) return;
+const markdownDir = path.resolve(__dirname, markdownFlag);
+const styleguidistDir = path.resolve(__dirname, styleguidistFlag);
+
 logger.ready("cli parameters are present");
-logger.log(`--markdown = "${flags.markdown}"`);
-logger.log(`--styleguidist = "${flags.styleguidist}"`);
+logger.log(`markdown directory = ${markdownDir}`);
+logger.log(`styleguidist directory = ${styleguidistDir}`);
 
-logger.start("find markdown files");
+(async () => {
+  try {
+    //
+    newLine() || logger.start("find markdown files");
+    const markdownFiles = await findMarkdownFiles(markdownDir);
+    if (!markdownFiles.length) return logger.warn("no markdown files found");
+    logger.success(`found ${markdownFiles.length} markdown files`);
+    markdownFiles.forEach(file => logger.log(file));
+    //
+    for (markdownFile of markdownFiles) {
+      //
+      newLine() || logger.start(`extract code examples from ${markdownFile}`);
+      const markdownData = await readMarkdownData(markdownFile);
+      logger.ready("got markdown data");
+      const markdownExamples = extractMarkdownExamples(markdownData);
+      if (!markdownExamples.length)
+        return logger.warn("no code examples found");
+      logger.info(`found ${markdownExamples.length} markdown examples`);
+
+      // for (example of codeExamples) {
+      //   // convert vis AST
+      // }
+    }
+  } catch (error) {
+    logger.error(error);
+  }
+})();
 
 // (() => {
 //     console.log("RUNNING!");
