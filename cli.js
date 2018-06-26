@@ -10,6 +10,7 @@ const logger = require("consola").withScope("translation");
 const findMarkdownFiles = require("./find-markdown-files");
 const readMarkdownData = require("./read-markdown-data");
 const extractMarkdownExamples = require("./extract-markdown-examples");
+const parseExampleAttributes = require("./parse-example-attributes");
 const newLine = () => console.log("\n");
 
 // logger.fatal("this is a fatal message");
@@ -69,10 +70,12 @@ logger.log(`styleguidist directory = ${styleguidistDir}`);
       if (!markdownExamples.length)
         return logger.warn("no code examples found");
       logger.info(`found ${markdownExamples.length} markdown examples`);
-
-      // for (example of codeExamples) {
-      //   // convert vis AST
-      // }
+      //
+      for (markdownExample of markdownExamples) {
+        // convert vis AST
+        const attributes = parseExampleAttributes(markdownExample);
+        console.log(attributes);
+      }
     }
   } catch (error) {
     logger.error(error);
