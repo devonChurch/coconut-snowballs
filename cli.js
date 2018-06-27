@@ -67,14 +67,31 @@ logger.log(`styleguidist directory = ${styleguidistDir}`);
       const markdownData = await readMarkdownData(markdownFile);
       logger.ready("got markdown data");
       const markdownExamples = extractMarkdownExamples(markdownData);
-      if (!markdownExamples.length)
-        return logger.warn("no code examples found");
+      if (!markdownExamples.length) {
+        logger.warn("no code examples found");
+        continue;
+      }
+
       logger.info(`found ${markdownExamples.length} markdown examples`);
       //
       for (markdownExample of markdownExamples) {
-        // convert vis AST
-        const attributes = parseExampleAttributes(markdownExample);
-        console.log(attributes);
+        //
+        const { id, languages, english } = parseExampleAttributes(
+          markdownExample
+        );
+        if (!id && !languages && !english) {
+          logger.warn("no translation sequence extracted");
+          continue;
+        } else if (!id) {
+          logger.error("could not extract id prop");
+          continue;
+        } else if (!languages) {
+          logger.error("could not extract languages prop");
+          continue;
+        } else if (!english) {
+          logger.error("could not extract english prop");
+          continue;
+        }
       }
     }
   } catch (error) {

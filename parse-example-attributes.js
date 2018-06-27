@@ -1,53 +1,47 @@
 const jscodeshift = require("jscodeshift");
 
-// console.log("jscodeshift", jscodeshift);
+const parseId = path => path.value.value.value;
 
-// const j = jscodeshift;
+const parseLanguage = path =>
+  path.value.value.expression.elements.map(({ value }) => value);
+
+const parseEnglish = path => {
+  const createAwaitFunction = path =>
+    jscodeshift(path).replaceWith(
+      jscodeshift.awaitExpression(
+        jscodeshift.callExpression(jscodeshift.identifier("translate"), [
+          jscodeshift.literal(path.value.value)
+        ])
+      )
+    );
+
+  const expression = jscodeshift(path.value.value.expression)
+    .find(jscodeshift.Literal)
+    .forEach(createAwaitFunction)
+    .toSource();
+
+  return eval(`async (translate) => (${expression});`);
+};
 
 module.exports = example => {
-  let extractedId, extractedLanguages, extractedData;
+  let id, languages, english;
 
   jscodeshift(example)
     .findJSXElements("Translate")
     .find(jscodeshift.JSXAttribute)
     .forEach(path => {
-      // console.log(path);
       const { name } = path.value.name;
 
       if (name === "id") {
-        extractedId = path.value.value.value;
+        id = parseId(path);
       } else if (name === "languages") {
-        // extractedLanguages = jscodeshift(
-        //   path.value.value.expression
-        // ).toSource();
-        extractedLanguages = path.value.value.expression.elements.map(
-          ({ value }) => value
-        );
-        // JSON.parse(
-        //   jscodeshift(path.value.value.expression).toSource()
-        // );
+        languages = parseLanguage(path);
       } else if (name === "english") {
-        extractedData = jscodeshift(path.value.value.expression)
-          .find(jscodeshift.Literal)
-          .forEach(path => {
-            const { value } = path.value;
-
-            jscodeshift(path).replaceWith(
-              jscodeshift.awaitExpression(
-                jscodeshift.callExpression(
-                  jscodeshift.identifier("translate"),
-                  [jscodeshift.literal(value)]
-                )
-              )
-            );
-          })
-          .toSource();
+        english = parseEnglish(path);
       }
     });
 
-  // console.log({extractedId, extractedLanguages, extractedData});
-
-  return { extractedId, extractedLanguages, extractedData };
+  return { id, languages, english };
 };
 
 // - - - - - - - - - - - - - - - - - - - -
