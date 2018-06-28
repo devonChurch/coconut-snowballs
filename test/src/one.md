@@ -3,7 +3,7 @@ asdas dasda dasdasdad
 ```
 <Translate
   id="1a2b3c"
-  languages={['ab', 'cd']}
+  languages={['de', 'fr']}
   english={{
     title: 'Hello',
     description: 'This is an example',

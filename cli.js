@@ -6,11 +6,13 @@ const path = require("path");
 const fs = require("fs");
 const readFileAsync = promisify(fs.readFile);
 const readdirAsync = promisify(fs.readdir);
+const writeFileAsync = promisify(fs.writeFile);
 const logger = require("consola").withScope("translation");
 const findMarkdownFiles = require("./find-markdown-files");
 const readMarkdownData = require("./read-markdown-data");
 const extractMarkdownExamples = require("./extract-markdown-examples");
 const parseExampleAttributes = require("./parse-example-attributes");
+const createTranslator = require("./create-translator");
 const newLine = () => console.log("\n");
 
 // logger.fatal("this is a fatal message");
@@ -92,6 +94,22 @@ logger.log(`styleguidist directory = ${styleguidistDir}`);
           logger.error("could not extract english prop");
           continue;
         }
+        let translations = {};
+        for (language of languages) {
+          const translator = createTranslator(language);
+          const translation = await english(translator);
+          // console.log(translation);
+          translations = {
+            ...translations,
+            [language]: translation
+          };
+        }
+        console.log(translations);
+        await writeFileAsync(
+          `${styleguidistDir}${id}.json`,
+          JSON.stringify(translations),
+          "utf8"
+        );
       }
     }
   } catch (error) {

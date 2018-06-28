@@ -20,7 +20,7 @@ const parseEnglish = path => {
     .forEach(createAwaitFunction)
     .toSource();
 
-  return eval(`async (translate) => (${expression});`);
+  return eval(`async translate => (${expression});`);
 };
 
 module.exports = example => {

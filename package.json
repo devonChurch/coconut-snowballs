@@ -25,6 +25,7 @@
     "glob": "^7.1.2"
   },
   "devDependencies": {
+    "aws-sdk": "^2.264.1",
     "jscodeshift": "^0.5.1"
   }
 }
