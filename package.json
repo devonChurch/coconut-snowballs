@@ -7,7 +7,13 @@
     "coconut-snowballs": "./cli.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "commit": "git-cz",
+    "build:development": "webpack",
+    "build:production": "webpack -p",
+    "test": "jest",
+    "deploy": "semantic-release",
+    "semantic-release": "semantic-release",
+    "travis-deploy-once": "travis-deploy-once"
   },
   "repository": {
     "type": "git",
@@ -20,12 +26,34 @@
   },
   "homepage": "https://github.com/devonChurch/coconut-snowballs#readme",
   "dependencies": {
+    "@semantic-release/npm": "^3.2.5",
+    "@types/jest": "^22.2.3",
     "args": "^5.0.0",
+    "clean-webpack-plugin": "^0.1.19",
+    "commitizen": "^2.9.6",
     "consola": "^1.4.1",
-    "glob": "^7.1.2"
+    "cz-conventional-changelog": "^2.1.0",
+    "glob": "^7.1.2",
+    "jest": "^23.0.1",
+    "react": "^16.4.1",
+    "semantic-release": "^15.4.1",
+    "semantic-release-cli": "^4.0.1",
+    "travis-deploy-once": "^5.0.0",
+    "ts-jest": "^22.4.6",
+    "ts-loader": "^4.3.0",
+    "typescript": "^2.8.3",
+    "webpack": "^4.8.3",
+    "webpack-cli": "^2.1.3"
   },
   "devDependencies": {
+    "@types/react": "^16.4.5",
     "aws-sdk": "^2.264.1",
-    "jscodeshift": "^0.5.1"
+    "jscodeshift": "^0.5.1",
+    "shebang-loader": "0.0.1"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }

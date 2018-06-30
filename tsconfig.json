@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "outDir": "./",
+    "sourceMap": true,
+    "declaration": true,
+    "noImplicitAny": false,
+    "module": "es6",
+    "target": "es5",
+    "allowJs": false,
+    "jsx": "react",
+    "lib": [ "es2015", "es7", "dom" ]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}

@@ -1,70 +1,15 @@
-import { Component } from "react";
-
-class Translate extends Component {
-  state = {
-    language: "en",
-    translations: null
-  };
-
-  englishOption = { code: "en", name: "English" };
-
-  options = [
-    this.englishOption,
-    { code: "ar", name: "Arabic" },
-    { code: "zh", name: "Chinese" },
-    { code: "fr", name: "French" },
-    { code: "de", name: "German" },
-    { code: "pt", name: "Portuguese" },
-    { code: "es", name: "Spanish" }
-  ];
-
-  createSelectOptions = () => {
-    const {
-      options,
-      props: { languages },
-      englishOption
-    } = this;
-
-    return [
-      englishOption,
-      ...options.reduce(
-        (acc, { code, name }) =>
-          languages.includes(code) ? [...acc, { code, name }] : acc
-      )
-    ];
-  };
-
-  testIsEnglish = language => {
-    const { state, options, englishOption } = this;
-
-    return (language || state.language) === englishOption.code;
-  };
-
-  handleSelectChange = async event => {
-    const language = event.target.value;
-    const translations = this.testIsEnglish(language)
-      ? this.props.english
-      : this.state.translations || JSON.parse(await requestData());
-
-    this.setState({ language, translations });
-  };
-
-  render = () => {
-    const { children, id, languages, english } = this.props;
-    const { language, translations } = this.state;
-    const translation = this.testIsEnglish() ? english : translations[language];
-
-    return (
-      <div>
-        <div>
-          <select value={language} onChange={this.handleSelectChange}>
-            {this.createSelectOptions().map(({ name, code }) => (
-              <option value={code}>{name}</option>
-            ))}
-          </select>
-        </div>
-        {children(translation)}
-      </div>
-    );
-  };
-}
+!function(e,t){"object"==typeof exports&&"object"==typeof module?module.exports=t():"function"==typeof define&&define.amd?define([],t):"object"==typeof exports?exports.coconutSnowballs=t():e.coconutSnowballs=t()}("undefined"!=typeof self?self:this,function(){return function(e){var t={};function n(r){if(t[r])return t[r].exports;var o=t[r]={i:r,l:!1,exports:{}};return e[r].call(o.exports,o,o.exports,n),o.l=!0,o.exports}return n.m=e,n.c=t,n.d=function(e,t,r){n.o(e,t)||Object.defineProperty(e,t,{enumerable:!0,get:r})},n.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},n.t=function(e,t){if(1&t&&(e=n(e)),8&t)return e;if(4&t&&"object"==typeof e&&e&&e.__esModule)return e;var r=Object.create(null);if(n.r(r),Object.defineProperty(r,"default",{enumerable:!0,value:e}),2&t&&"string"!=typeof e)for(var o in e)n.d(r,o,function(t){return e[t]}.bind(null,o));return r},n.n=function(e){var t=e&&e.__esModule?function(){return e.default}:function(){return e};return n.d(t,"a",t),t},n.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},n.p="",n(n.s=6)}([function(e,t,n){"use strict";e.exports=n(5)},function(e,t,n){"use strict";function r(e){return function(){return e}}var o=function(){};o.thatReturns=r,o.thatReturnsFalse=r(!1),o.thatReturnsTrue=r(!0),o.thatReturnsNull=r(null),o.thatReturnsThis=function(){return this},o.thatReturnsArgument=function(e){return e},e.exports=o},function(e,t,n){"use strict";e.exports={}},function(e,t,n){"use strict";var r=function(e){};e.exports=function(e,t,n,o,u,i,a,l){if(r(t),!e){var c;if(void 0===t)c=new Error("Minified exception occurred; use the non-minified dev environment for the full error message and additional helpful warnings.");else{var f=[n,o,u,i,a,l],s=0;(c=new Error(t.replace(/%s/g,function(){return f[s++]}))).name="Invariant Violation"}throw c.framesToPop=1,c}}},function(e,t,n){"use strict";
+/*
+object-assign
+(c) Sindre Sorhus
+@license MIT
+*/var r=Object.getOwnPropertySymbols,o=Object.prototype.hasOwnProperty,u=Object.prototype.propertyIsEnumerable;e.exports=function(){try{if(!Object.assign)return!1;var e=new String("abc");if(e[5]="de","5"===Object.getOwnPropertyNames(e)[0])return!1;for(var t={},n=0;n<10;n++)t["_"+String.fromCharCode(n)]=n;if("0123456789"!==Object.getOwnPropertyNames(t).map(function(e){return t[e]}).join(""))return!1;var r={};return"abcdefghijklmnopqrst".split("").forEach(function(e){r[e]=e}),"abcdefghijklmnopqrst"===Object.keys(Object.assign({},r)).join("")}catch(e){return!1}}()?Object.assign:function(e,t){for(var n,i,a=function(e){if(null===e||void 0===e)throw new TypeError("Object.assign cannot be called with null or undefined");return Object(e)}(e),l=1;l<arguments.length;l++){for(var c in n=Object(arguments[l]))o.call(n,c)&&(a[c]=n[c]);if(r){i=r(n);for(var f=0;f<i.length;f++)u.call(n,i[f])&&(a[i[f]]=n[i[f]])}}return a}},function(e,t,n){"use strict";
+/** @license React v16.4.1
+ * react.production.min.js
+ *
+ * Copyright (c) 2013-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */var r=n(4),o=n(3),u=n(2),i=n(1),a="function"==typeof Symbol&&Symbol.for,l=a?Symbol.for("react.element"):60103,c=a?Symbol.for("react.portal"):60106,f=a?Symbol.for("react.fragment"):60107,s=a?Symbol.for("react.strict_mode"):60108,p=a?Symbol.for("react.profiler"):60114,d=a?Symbol.for("react.provider"):60109,y=a?Symbol.for("react.context"):60110,h=a?Symbol.for("react.async_mode"):60111,v=a?Symbol.for("react.forward_ref"):60112;a&&Symbol.for("react.timeout");var b="function"==typeof Symbol&&Symbol.iterator;function m(e){for(var t=arguments.length-1,n="https://reactjs.org/docs/error-decoder.html?invariant="+e,r=0;r<t;r++)n+="&args[]="+encodeURIComponent(arguments[r+1]);o(!1,"Minified React error #"+e+"; visit %s for the full message or use the non-minified dev environment for full errors and additional helpful warnings. ",n)}var g={isMounted:function(){return!1},enqueueForceUpdate:function(){},enqueueReplaceState:function(){},enqueueSetState:function(){}};function _(e,t,n){this.props=e,this.context=t,this.refs=u,this.updater=n||g}function w(){}function O(e,t,n){this.props=e,this.context=t,this.refs=u,this.updater=n||g}_.prototype.isReactComponent={},_.prototype.setState=function(e,t){"object"!=typeof e&&"function"!=typeof e&&null!=e&&m("85"),this.updater.enqueueSetState(this,e,t,"setState")},_.prototype.forceUpdate=function(e){this.updater.enqueueForceUpdate(this,e,"forceUpdate")},w.prototype=_.prototype;var S=O.prototype=new w;S.constructor=O,r(S,_.prototype),S.isPureReactComponent=!0;var j={current:null},x=Object.prototype.hasOwnProperty,P={key:!0,ref:!0,__self:!0,__source:!0};function k(e,t,n){var r=void 0,o={},u=null,i=null;if(null!=t)for(r in void 0!==t.ref&&(i=t.ref),void 0!==t.key&&(u=""+t.key),t)x.call(t,r)&&!P.hasOwnProperty(r)&&(o[r]=t[r]);var a=arguments.length-2;if(1===a)o.children=n;else if(1<a){for(var c=Array(a),f=0;f<a;f++)c[f]=arguments[f+2];o.children=c}if(e&&e.defaultProps)for(r in a=e.defaultProps)void 0===o[r]&&(o[r]=a[r]);return{$$typeof:l,type:e,key:u,ref:i,props:o,_owner:j.current}}function E(e){return"object"==typeof e&&null!==e&&e.$$typeof===l}var R=/\/+/g,C=[];function $(e,t,n,r){if(C.length){var o=C.pop();return o.result=e,o.keyPrefix=t,o.func=n,o.context=r,o.count=0,o}return{result:e,keyPrefix:t,func:n,context:r,count:0}}function A(e){e.result=null,e.keyPrefix=null,e.func=null,e.context=null,e.count=0,10>C.length&&C.push(e)}function T(e,t,n,r){var o=typeof e;"undefined"!==o&&"boolean"!==o||(e=null);var u=!1;if(null===e)u=!0;else switch(o){case"string":case"number":u=!0;break;case"object":switch(e.$$typeof){case l:case c:u=!0}}if(u)return n(r,e,""===t?"."+I(e,0):t),1;if(u=0,t=""===t?".":t+":",Array.isArray(e))for(var i=0;i<e.length;i++){var a=t+I(o=e[i],i);u+=T(o,a,n,r)}else if(null===e||void 0===e?a=null:a="function"==typeof(a=b&&e[b]||e["@@iterator"])?a:null,"function"==typeof a)for(e=a.call(e),i=0;!(o=e.next()).done;)u+=T(o=o.value,a=t+I(o,i++),n,r);else"object"===o&&m("31","[object Object]"===(n=""+e)?"object with keys {"+Object.keys(e).join(", ")+"}":n,"");return u}function I(e,t){return"object"==typeof e&&null!==e&&null!=e.key?function(e){var t={"=":"=0",":":"=2"};return"$"+(""+e).replace(/[=:]/g,function(e){return t[e]})}(e.key):t.toString(36)}function M(e,t){e.func.call(e.context,t,e.count++)}function N(e,t,n){var r=e.result,o=e.keyPrefix;e=e.func.call(e.context,t,e.count++),Array.isArray(e)?q(e,r,n,i.thatReturnsArgument):null!=e&&(E(e)&&(t=o+(!e.key||t&&t.key===e.key?"":(""+e.key).replace(R,"$&/")+"/")+n,e={$$typeof:l,type:e.type,key:t,ref:e.ref,props:e.props,_owner:e._owner}),r.push(e))}function q(e,t,n,r,o){var u="";null!=n&&(u=(""+n).replace(R,"$&/")+"/"),t=$(t,u,r,o),null==e||T(e,"",N,t),A(t)}var F={Children:{map:function(e,t,n){if(null==e)return e;var r=[];return q(e,r,null,t,n),r},forEach:function(e,t,n){if(null==e)return e;t=$(null,null,t,n),null==e||T(e,"",M,t),A(t)},count:function(e){return null==e?0:T(e,"",i.thatReturnsNull,null)},toArray:function(e){var t=[];return q(e,t,null,i.thatReturnsArgument),t},only:function(e){return E(e)||m("143"),e}},createRef:function(){return{current:null}},Component:_,PureComponent:O,createContext:function(e,t){return void 0===t&&(t=null),(e={$$typeof:y,_calculateChangedBits:t,_defaultValue:e,_currentValue:e,_currentValue2:e,_changedBits:0,_changedBits2:0,Provider:null,Consumer:null}).Provider={$$typeof:d,_context:e},e.Consumer=e},forwardRef:function(e){return{$$typeof:v,render:e}},Fragment:f,StrictMode:s,unstable_AsyncMode:h,unstable_Profiler:p,createElement:k,cloneElement:function(e,t,n){(null===e||void 0===e)&&m("267",e);var o=void 0,u=r({},e.props),i=e.key,a=e.ref,c=e._owner;if(null!=t){void 0!==t.ref&&(a=t.ref,c=j.current),void 0!==t.key&&(i=""+t.key);var f=void 0;for(o in e.type&&e.type.defaultProps&&(f=e.type.defaultProps),t)x.call(t,o)&&!P.hasOwnProperty(o)&&(u[o]=void 0===t[o]&&void 0!==f?f[o]:t[o])}if(1===(o=arguments.length-2))u.children=n;else if(1<o){f=Array(o);for(var s=0;s<o;s++)f[s]=arguments[s+2];u.children=f}return{$$typeof:l,type:e.type,key:i,ref:a,props:u,_owner:c}},createFactory:function(e){var t=k.bind(null,e);return t.type=e,t},isValidElement:E,version:"16.4.1",__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED:{ReactCurrentOwner:j,assign:r}},U={default:F},V=U&&F||U;e.exports=V.default?V.default:V},function(e,t,n){"use strict";n.r(t);var r=n(0),o=function(){var e=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(e,t){e.__proto__=t}||function(e,t){for(var n in t)t.hasOwnProperty(n)&&(e[n]=t[n])};return function(t,n){function r(){this.constructor=t}e(t,n),t.prototype=null===n?Object.create(n):(r.prototype=n.prototype,new r)}}(),u=function(e,t,n,r){return new(n||(n=Promise))(function(o,u){function i(e){try{l(r.next(e))}catch(e){u(e)}}function a(e){try{l(r.throw(e))}catch(e){u(e)}}function l(e){e.done?o(e.value):new n(function(t){t(e.value)}).then(i,a)}l((r=r.apply(e,t||[])).next())})},i=function(e,t){var n,r,o,u,i={label:0,sent:function(){if(1&o[0])throw o[1];return o[1]},trys:[],ops:[]};return u={next:a(0),throw:a(1),return:a(2)},"function"==typeof Symbol&&(u[Symbol.iterator]=function(){return this}),u;function a(u){return function(a){return function(u){if(n)throw new TypeError("Generator is already executing.");for(;i;)try{if(n=1,r&&(o=2&u[0]?r.return:u[0]?r.throw||((o=r.return)&&o.call(r),0):r.next)&&!(o=o.call(r,u[1])).done)return o;switch(r=0,o&&(u=[2&u[0],o.value]),u[0]){case 0:case 1:o=u;break;case 4:return i.label++,{value:u[1],done:!1};case 5:i.label++,r=u[1],u=[0];continue;case 7:u=i.ops.pop(),i.trys.pop();continue;default:if(!(o=(o=i.trys).length>0&&o[o.length-1])&&(6===u[0]||2===u[0])){i=0;continue}if(3===u[0]&&(!o||u[1]>o[0]&&u[1]<o[3])){i.label=u[1];break}if(6===u[0]&&i.label<o[1]){i.label=o[1],o=u;break}if(o&&i.label<o[2]){i.label=o[2],i.ops.push(u);break}o[2]&&i.ops.pop(),i.trys.pop();continue}u=t.call(e,i)}catch(e){u=[6,e],r=0}finally{n=o=0}if(5&u[0])throw u[1];return{value:u[0]?u[1]:void 0,done:!0}}([u,a])}}},a=function(){return new Promise(function(e){setTimeout(function(){e("{ text: 'Potato' }")},1e3)})},l=function(e){function t(){var t=null!==e&&e.apply(this,arguments)||this;return t.state={language:"en",translations:null},t.englishOption={code:"en",name:"English"},t.options=[t.englishOption,{code:"ar",name:"Arabic"},{code:"zh",name:"Chinese"},{code:"fr",name:"French"},{code:"de",name:"German"},{code:"pt",name:"Portuguese"},{code:"es",name:"Spanish"}],t.createSelectOptions=function(){var e=t,n=e.options,r=e.props.languages;return[e.englishOption].concat(n.reduce(function(e,t){var n=t.code,o=t.name;return r.includes(n)?e.concat([{code:n,name:o}]):e},[]))},t.testIsEnglish=function(e){var n=t,r=n.state,o=(n.options,n.englishOption);return(e||r.language)===o.code},t.handleSelectChange=function(e){return u(t,void 0,void 0,function(){var t,n,r,o,u,l,c;return i(this,function(i){switch(i.label){case 0:return t=e.target.value,this.testIsEnglish(t)?(r=this.props.english,[3,4]):[3,1];case 1:return(o=this.state.translations)?[3,3]:(l=(u=JSON).parse,c="",[4,a()]);case 2:o=l.apply(u,[c+i.sent()]),i.label=3;case 3:r=o,i.label=4;case 4:return n=r,this.setState({language:t,translations:n}),[2]}})})},t}return o(t,e),t.prototype.render=function(){var e=this.props,t=e.children,n=(e.id,e.languages,e.english),o=this.state,u=o.language,i=o.translations,a=this.testIsEnglish()?n:i[u];return r.createElement("div",null,r.createElement("div",null,r.createElement("select",{value:u,onChange:this.handleSelectChange},this.createSelectOptions().map(function(e){var t=e.name,n=e.code;return r.createElement("option",{value:n},t)}))),t(a))},t}(r.Component);t.default=l}])});
+//# sourceMappingURL=index.js.map
