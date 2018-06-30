@@ -47,8 +47,9 @@ const { markdown: markdownFlag, styleguidist: styleguidistFlag } = args.parse(
 
 if (!markdownFlag && !styleguidistFlag) return;
 
-const markdownDir = path.resolve(__dirname, markdownFlag);
-const styleguidistDir = path.resolve(__dirname, styleguidistFlag);
+const curentDir = process.cwd();
+const markdownDir = path.resolve(curentDir, markdownFlag);
+const styleguidistDir = path.resolve(curentDir, styleguidistFlag);
 
 logger.ready("cli parameters are present");
 logger.log(`markdown directory = ${markdownDir}`);
@@ -134,7 +135,7 @@ logger.log(`styleguidist directory = ${styleguidistDir}`);
 // }
 
 /*
-const filesDir = path.resolve(__dirname, "files");
+const filesDir = path.resolve(curentDir, "files");
 const say = message =>
   new Promise(resolve => {
     setTimeout(() => resolve(`completed | ${message}`), Math.random() * 5);
