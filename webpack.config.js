@@ -45,41 +45,43 @@ const config = [
     // plugins: [new CleanWebpackPlugin(dirDist)]
   },
 
-  {
-    mode: isProduction ? PRODUCTION_ENV : DEVELOPMENT_ENV,
+  // {
+  //   mode: isProduction ? PRODUCTION_ENV : DEVELOPMENT_ENV,
 
-    target: 'node',
+  //   target: 'node',
 
-    entry: `${dirSrc}/cli-sequence.js`,
+  //   libraryTarget: 'commonjs',
 
-    output: {
-      path: dirDist,
-      filename: 'cli-sequence.js',
-    },
+  //   entry: `${dirSrc}/cli-sequence.js`,
 
-    devtool: isProduction ? 'source-map' : 'cheap-source-map',
+  //   output: {
+  //     path: dirDist,
+  //     filename: 'cli-sequence.js',
+  //   },
 
-    stats: isProduction ? 'normal' : 'errors-only',
+  //   devtool: isProduction ? 'source-map' : 'cheap-source-map',
 
-    module: {
-      rules: [
-        // {
-        //   test: /\.(ts|tsx)$/,
-        //   use: 'shebang-loader ts-loader',
-        //   include: dirSrc,
-        // },
-        // {
-        //   test: /\.(js)$/,
-        //   use: 'shebang-loader',
-        //   include: dirSrc,
-        // },
-      ],
-    },
+  //   stats: isProduction ? 'normal' : 'errors-only',
 
-    resolve: {
-      extensions: ['.ts', '.js'],
-    },
-  },
+  //   module: {
+  //     rules: [
+  //       // {
+  //       //   test: /\.(ts|tsx)$/,
+  //       //   use: 'shebang-loader ts-loader',
+  //       //   include: dirSrc,
+  //       // },
+  //       // {
+  //       //   test: /\.(js)$/,
+  //       //   use: 'shebang-loader',
+  //       //   include: dirSrc,
+  //       // },
+  //     ],
+  //   },
+
+  //   resolve: {
+  //     extensions: ['.ts', '.js'],
+  //   },
+  // },
 ];
 
 module.exports = config;

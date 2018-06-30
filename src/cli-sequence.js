@@ -1,7 +1,8 @@
 const args = require('args');
 const { promisify } = require('util');
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs-extra');
+const { emptyDir: emptyDirAsync } = fs;
 const readFileAsync = promisify(fs.readFile);
 const readdirAsync = promisify(fs.readdir);
 const writeFileAsync = promisify(fs.writeFile);
@@ -48,10 +49,13 @@ const newLine = () => console.log('\n');
     const curentDir = process.cwd();
     const markdownDir = path.resolve(curentDir, markdownFlag);
     const styleguidistDir = path.resolve(curentDir, styleguidistFlag);
+    const translationsDir = path.resolve(curentDir, styleguidistFlag, 'translations');
+    await emptyDirAsync(translationsDir);
 
     logger.ready('cli parameters are present');
     logger.log(`markdown directory = ${markdownDir}`);
     logger.log(`styleguidist directory = ${styleguidistDir}`);
+
     //
     newLine() || logger.start('find markdown files');
     const markdownFiles = await findMarkdownFiles(markdownDir);
@@ -99,7 +103,7 @@ const newLine = () => console.log('\n');
           };
         }
         console.log(translations);
-        await writeFileAsync(`${styleguidistDir}${id}.json`, JSON.stringify(translations), 'utf8');
+        await writeFileAsync(`${translationsDir}/${id}.json`, JSON.stringify(translations), 'utf8');
       }
     }
   } catch (error) {
