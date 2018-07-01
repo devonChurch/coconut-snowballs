@@ -34,12 +34,12 @@ class Translate extends React.Component<Props, State> {
 
   options = [
     this.englishOption,
-    { code: 'ar', name: 'Arabic' },
-    { code: 'zh', name: 'Chinese' },
-    { code: 'fr', name: 'French' },
-    { code: 'de', name: 'German' },
-    { code: 'pt', name: 'Portuguese' },
-    { code: 'es', name: 'Spanish' },
+    { code: 'ar', name: 'العربية' }, // Arabic
+    { code: 'zh', name: '中文' }, // Chinese
+    { code: 'fr', name: 'Français' }, // French
+    { code: 'de', name: 'Deutsch' }, // German
+    { code: 'pt', name: 'Português' }, // Portuguese
+    { code: 'es', name: 'Español' }, // Spanish
   ];
 
   createSelectOptions = () => {
@@ -68,7 +68,6 @@ class Translate extends React.Component<Props, State> {
     const { id, english } = this.props;
     let translations;
     try {
-      // const response = await axios.get(`/translations?id=${id}`);
       const response = await axios.get(`/translations/${id}.json`);
       translations = response.data;
       console.log(translations);
@@ -84,8 +83,7 @@ class Translate extends React.Component<Props, State> {
     const language = event.target.value;
     const translations = this.testIsEnglish(language)
       ? this.props.english
-      : // : this.state.translations || JSON.parse(`${await this.getPreTranslatedData()}`);
-        this.state.translations || (await this.getPreTranslatedData());
+      : this.state.translations || (await this.getPreTranslatedData());
 
     this.setState({ language, translations });
   };
