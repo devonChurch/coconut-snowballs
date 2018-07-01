@@ -1,11 +1,14 @@
 import * as React from 'react';
+import axios from 'axios';
 
-const requestData = () =>
-  new Promise(resolve => {
-    setTimeout(() => {
-      resolve(`{ text: 'Potato' }`);
-    }, 1000);
-  });
+// console.log('axios', axios);
+
+// const requestData = () =>
+//   new Promise(resolve => {
+//     setTimeout(() => {
+//       resolve(`{ text: 'Potato' }`);
+//     }, 1000);
+//   });
 
 type Translations = string | number | object | Array<any>;
 
@@ -61,11 +64,28 @@ class Translate extends React.Component<Props, State> {
     return (language || state.language) === englishOption.code;
   };
 
+  getPreTranslatedData = async () => {
+    const { id, english } = this.props;
+    let translations;
+    try {
+      // const response = await axios.get(`/translations?id=${id}`);
+      const response = await axios.get(`/translations/${id}.json`);
+      translations = response.data;
+      console.log(translations);
+    } catch (error) {
+      console.error(error);
+      translations = english;
+    }
+
+    return translations;
+  };
+
   handleSelectChange = async event => {
     const language = event.target.value;
     const translations = this.testIsEnglish(language)
       ? this.props.english
-      : this.state.translations || JSON.parse(`${await requestData()}`);
+      : // : this.state.translations || JSON.parse(`${await this.getPreTranslatedData()}`);
+        this.state.translations || (await this.getPreTranslatedData());
 
     this.setState({ language, translations });
   };
@@ -80,7 +100,9 @@ class Translate extends React.Component<Props, State> {
         <div>
           <select value={language} onChange={this.handleSelectChange}>
             {this.createSelectOptions().map(({ name, code }) => (
-              <option value={code}>{name}</option>
+              <option key={code} value={code}>
+                {name}
+              </option>
             ))}
           </select>
         </div>

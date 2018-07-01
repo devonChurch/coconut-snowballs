@@ -5,6 +5,7 @@
     "declaration": true,
     "noImplicitAny": false,
     "module": "es6",
+    "moduleResolution": "node",
     "target": "es5",
     "allowJs": false,
     "jsx": "react",

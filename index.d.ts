@@ -25,6 +25,7 @@ declare class Translate extends React.Component<Props, State> {
     }[];
     createSelectOptions: () => any[];
     testIsEnglish: (language?: string) => boolean;
+    getPreTranslatedData: () => Promise<any>;
     handleSelectChange: (event: any) => Promise<void>;
     render(): JSX.Element;
 }
