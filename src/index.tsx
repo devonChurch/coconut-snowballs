@@ -1,14 +1,34 @@
 import * as React from 'react';
 import axios from 'axios';
 
-// console.log('axios', axios);
-
 // const requestData = () =>
 //   new Promise(resolve => {
 //     setTimeout(() => {
 //       resolve(`{ text: 'Potato' }`);
 //     }, 1000);
 //   });
+
+/*
+Sequence:
+---------
+
+Mount -vs- Update
+-----      ------
+
+Mount:
++ On page load
+  - Use cached data
++ On Styleguidist Guide code change
+  - Fetch new data
+  - Ask before fetching
+
+Update:
++ Change <select /> option
+  - Get language option from state
+  - Unless this is the very first selection against cached data... then we need to fetch
+
+
+*/
 
 type Translations = object | Array<any>;
 
@@ -20,193 +40,169 @@ interface Props {
 }
 
 interface State {
-  currentLanguage: string;
-  previousLanguage: string;
+  language: string;
   translations: Translations;
   isLoading: boolean;
+  errorMessage: string;
 }
 
 const cachedTranslations = {};
 
+const englishSelectOption = { code: 'en', name: 'English' }; // English
+
+const allSelectOptions = [
+  englishSelectOption,
+  { code: 'ar', name: 'العربية' }, // Arabic
+  { code: 'zh', name: '中文' }, // Chinese
+  { code: 'fr', name: 'Français' }, // French
+  { code: 'de', name: 'Deutsch' }, // German
+  { code: 'pt', name: 'Português' }, // Portuguese
+  { code: 'es', name: 'Español' }, // Spanish
+];
+
+const getHookReferences = ({ id, english }) => {
+  const cachedHook = cachedTranslations[id];
+  const currentHook = JSON.stringify(english);
+  const isCachedHook = cachedHook === currentHook;
+
+  return { cachedHook, currentHook, isCachedHook };
+};
+
+const createSelectOptions = languages => [
+  englishSelectOption,
+  ...allSelectOptions.reduce(
+    (acc, { code, name }) => (languages.includes(code) ? [...acc, { code, name }] : acc),
+    []
+  ),
+];
+
 class Translate extends React.Component<Props, State> {
-  englishOption = { code: 'en', name: 'English' }; // English
-
-  options = [
-    this.englishOption,
-    { code: 'ar', name: 'العربية' }, // Arabic
-    { code: 'zh', name: '中文' }, // Chinese
-    { code: 'fr', name: 'Français' }, // French
-    { code: 'de', name: 'Deutsch' }, // German
-    { code: 'pt', name: 'Português' }, // Portuguese
-    { code: 'es', name: 'Español' }, // Spanish
-  ];
-
   state = {
-    currentLanguage: this.englishOption.code,
-    previousLanguage: null,
-    translations: { [this.englishOption.code]: this.props.english },
+    language: englishSelectOption.code,
+    translations: { [englishSelectOption.code]: this.props.english },
     isLoading: false,
+    errorMessage: '',
   };
 
   componentDidMount() {
-    // get cached data OR get new data
-    // - is the current english data the same as the original reference?
-    //   - YES = get cached data
-
     const { id, english } = this.props;
-    const originalHook = cachedTranslations[id];
-    const currentHook = JSON.stringify(english);
+    const { cachedHook, currentHook } = getHookReferences({ id, english });
 
-    if (!originalHook) {
+    if (!cachedHook) {
+      console.log('cache | componentDidMount');
       cachedTranslations[id] = currentHook;
+    }
+  }
+
+  getCachedTranslationData = async id => {
+    const response = await axios.get(`/translations/${id}.json`);
+    return response.data;
+  };
+
+  getNewTranslationData = async (language, english) => {
+    const translations = await Promise.resolve({
+      fr: {
+        plain: 'French Hi!',
+      },
+      de: {
+        plain: 'German Hi!',
+      },
+    });
+
+    if (translations[language]) {
+      return { [language]: translations[language] };
     } else {
-      this.getTranslationData();
+      throw new Error('Broken');
     }
-  }
+  };
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log('componentDidUpdate', { prevProps, prevState, snapshot });
-    const shouldGetData =
-      JSON.stringify(prevProps.english) !== JSON.stringify(this.props.english) ||
-      prevState.currentLanguage !== this.state.currentLanguage;
-
-    console.log(
-      `shouldGetData`,
-      `${JSON.stringify(prevProps.english)} !== ${JSON.stringify(this.props.english)}`,
-      `${prevState.currentLanguage} !== ${this.state.currentLanguage}`
-    );
-    if (shouldGetData) {
-      this.getTranslationData();
-    }
-  }
-
-  getTranslationData = () => {
+  handleSelectChange = event => {
+    const language = event.target.value;
+    const hasTranslation = this.state.translations[language];
     const { id, english } = this.props;
-    const { isLoading } = this.state;
-    const originalHook = cachedTranslations[id];
-    const currentHook = JSON.stringify(english);
-    const shouldGetCachedData = !isLoading && originalHook === currentHook;
-    const shouldGetNewData = !isLoading && originalHook !== currentHook;
-    console.log('cached data?', originalHook === currentHook);
-    console.log('originalHook', originalHook);
-    console.log('currentHook', currentHook);
-    console.log('isLoading', isLoading);
-    console.log('shouldGetCachedData', shouldGetCachedData);
-    console.log('shouldGetNewData', shouldGetNewData);
+    const { isCachedHook } = getHookReferences({ id, english });
 
-    if (shouldGetCachedData) {
-      // const translations = await this.setCachedTranslationData();
-      // Try and get from static cached transcations
-      // Or no request permission to dynamicly translate
-      console.log('setting cached data on update');
-      // this.setLoaderOn();
-      this.setCachedTranslationData({ id, english });
-    } else if (shouldGetNewData) {
-      // Request permission to dynamicly translate
-      console.log('setting custom data on update');
-      // this.setLoaderOn();
-      // ......
+    if (hasTranslation) {
+      console.log('get translation from state');
+      this.setState(prevState => ({ ...prevState, language }));
+    } else if (isCachedHook) {
+      console.log('get translation from cache');
+      this.startCachedTranslationSequence(id, language, english);
+    } else {
+      console.log('get translation dynamicly');
+      this.startNewTranslationSequence(language, english);
     }
   };
 
-  setLoaderOn = () =>
-    this.setState(prevState => ({
-      ...prevState,
-      isLoading: true,
-    }));
-
-  setLoaderOff = () =>
-    this.setState(prevState => ({
-      ...prevState,
-      isLoading: false,
-    }));
-
-  createSelectOptions = () => {
-    const {
-      options,
-      props: { languages },
-      englishOption,
-    } = this;
-
-    return [
-      englishOption,
-      ...options.reduce(
-        (acc, { code, name }) => (languages.includes(code) ? [...acc, { code, name }] : acc),
-        []
-      ),
-    ];
-  };
-
-  // testIsEnglish = (language?: string): boolean => {
-  //   const { state, options, englishOption } = this;
-
-  //   return (language || state.currentLanguage) === englishOption.code;
-  // };
-
-  setCachedTranslationData = async ({ id, english }) => {
-    this.setLoaderOn();
-    let translations;
+  startCachedTranslationSequence = async (id, language, english) => {
     try {
-      const response = await axios.get(`/translations/${id}.json`);
-      translations = response.data;
-      console.log('setCachedTranslationData', translations);
-      this.setState(prevState => ({
-        ...prevState,
-        translations: {
-          ...translations,
-          [this.englishOption.code]: this.props.english,
-        },
-      }));
+      this.setState(prevState => ({ ...prevState, isLoading: true }));
+      const translations = await this.getCachedTranslationData(id);
+      if (translations[language]) {
+        this.addTranslationsData(language, translations);
+      } else {
+        throw new Error('Broken');
+      }
     } catch (error) {
       console.error(error);
+      this.addErrorMessage(
+        'We could not find a matching translation in our cache. Going off to translate you request on the server.'
+      );
     }
-    // cachedTranslations[id] = currentHook;
-    this.setLoaderOff();
-
-    // return translations;
   };
 
-  handleSelectChange = async event => {
-    const currentLanguage = event.target.value;
-    // const translations = this.testIsEnglish(language) ? {} : await this.setCachedTranslationData();
+  startNewTranslationSequence = async (language, english) => {
+    try {
+      this.setState(prevState => ({ ...prevState, isLoading: true }));
+      const translations = await this.getNewTranslationData(language, english);
+      if (translations[language]) {
+        this.addTranslationsData(language, translations);
+      } else {
+        throw new Error('Broken');
+      }
+    } catch (error) {
+      console.error(error);
+      this.addErrorMessage(
+        'We are having trouble translating you request on the server. Please try again latter.'
+      );
+    }
+  };
 
-    // this.setState({
-    //   language,
-    //   translations: {
-    //     ...this.state.translations,
-    //     ...translations,
-    //   },
-    // });
+  addErrorMessage = errorMessage =>
+    this.setState(prevState => ({ ...prevState, isLoading: false, errorMessage }));
+
+  addTranslationsData = (language, translations) =>
     this.setState(prevState => ({
       ...prevState,
-      currentLanguage,
-      previousLanguage: this.state.currentLanguage,
+      language,
+      isLoading: false,
+      errorMessage: '',
+      translations: {
+        ...prevState.translations,
+        ...translations,
+        [englishSelectOption.code]: this.props.english,
+      },
     }));
-  };
 
   render() {
     const { children, id, languages, english } = this.props;
-    const { currentLanguage, previousLanguage, translations, isLoading } = this.state;
-    console.log(`translations[${currentLanguage}]`);
-    const translation =
-      translations[currentLanguage] ||
-      translations[previousLanguage] ||
-      translations[this.englishOption.code];
-    console.log(`translation`, translation);
-    // const translation = this.testIsEnglish() ? english : translations[language];
+    const { language, translations, isLoading, errorMessage } = this.state;
+    const translation = translations[language] || translations[englishSelectOption.code];
 
     return (
       <div>
         <div>
-          <select value={currentLanguage} onChange={this.handleSelectChange}>
-            {this.createSelectOptions().map(({ name, code }) => (
+          <select value={language} onChange={this.handleSelectChange}>
+            {createSelectOptions(languages).map(({ name, code }) => (
               <option key={code} value={code}>
                 {name}
               </option>
             ))}
           </select>
           {isLoading && <span>Loading</span>}
+          {errorMessage && <span>{errorMessage}</span>}
         </div>
+        <hr />
         {children(translation)}
       </div>
     );

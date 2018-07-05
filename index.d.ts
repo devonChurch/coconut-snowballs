@@ -7,39 +7,29 @@ interface Props {
     english: Translations;
 }
 interface State {
-    currentLanguage: string;
-    previousLanguage: string;
+    language: string;
     translations: Translations;
     isLoading: boolean;
+    errorMessage: string;
 }
 declare class Translate extends React.Component<Props, State> {
-    englishOption: {
-        code: string;
-        name: string;
-    };
-    options: {
-        code: string;
-        name: string;
-    }[];
     state: {
-        currentLanguage: string;
-        previousLanguage: any;
+        language: string;
         translations: {
             [x: string]: Translations;
         };
         isLoading: boolean;
+        errorMessage: string;
     };
     componentDidMount(): void;
-    componentDidUpdate(prevProps: any, prevState: any, snapshot: any): void;
-    getTranslationData: () => void;
-    setLoaderOn: () => void;
-    setLoaderOff: () => void;
-    createSelectOptions: () => any[];
-    setCachedTranslationData: ({ id, english }: {
-        id: any;
-        english: any;
-    }) => Promise<void>;
-    handleSelectChange: (event: any) => Promise<void>;
+    getCachedTranslationData: (id: any) => Promise<any>;
+    getNewTranslationData: (language: any, english: any) => Promise<{
+        [x: number]: any;
+    }>;
+    handleSelectChange: (event: any) => void;
+    startCachedTranslationSequence: (id: any, language: any, english: any) => Promise<void>;
+    startNewTranslationSequence: (language: any, english: any) => Promise<void>;
+    addTranslationsData: (language: any, translations: any) => void;
     render(): JSX.Element;
 }
 export default Translate;
