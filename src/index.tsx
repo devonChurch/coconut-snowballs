@@ -1,12 +1,24 @@
 import * as React from 'react';
 import axios from 'axios';
 
-// const requestData = () =>
-//   new Promise(resolve => {
-//     setTimeout(() => {
-//       resolve(`{ text: 'Potato' }`);
-//     }, 1000);
-//   });
+import Form from 'antd/lib/form/';
+import 'antd/lib/form/style/css';
+
+import Select from 'antd/lib/select/';
+import 'antd/lib/select/style/css';
+
+import Divider from 'antd/lib/divider/';
+import 'antd/lib/divider/style/css';
+
+const FormItem = Form.Item;
+const Option = Select.Option;
+
+const requestData = data =>
+  new Promise(resolve => {
+    setTimeout(() => {
+      resolve(data);
+    }, 3000);
+  });
 
 /*
 Sequence:
@@ -76,12 +88,24 @@ const createSelectOptions = languages => [
   ),
 ];
 
+const asyncMessages = {
+  cache: {
+    500: 'We encountered an error while requesting our cached data. Will retry your request via the server instead.',
+    404: 'We could not find a matching translation in our cache. Going off to translate your request on the server.',
+  },
+  server: {
+    500: 'We are having trouble translating your request on the server. Please try again later.',
+    404: 'We could not find a matching translation in our server response. Please try again later.',
+  },
+};
+
 class Translate extends React.Component<Props, State> {
   state = {
     language: englishSelectOption.code,
     translations: { [englishSelectOption.code]: this.props.english },
     isLoading: false,
     errorMessage: '',
+    warningMessage: '',
   };
 
   componentDidMount() {
@@ -100,7 +124,7 @@ class Translate extends React.Component<Props, State> {
   };
 
   getNewTranslationData = async (language, english) => {
-    const translations = await Promise.resolve({
+    const translations = await requestData({
       fr: {
         plain: 'French Hi!',
       },
@@ -116,15 +140,15 @@ class Translate extends React.Component<Props, State> {
     }
   };
 
-  handleSelectChange = event => {
-    const language = event.target.value;
-    const hasTranslation = this.state.translations[language];
+  handleSelectChange = language => {
+    const { translations } = this.state;
+    const hasTranslation = translations[language];
     const { id, english } = this.props;
     const { isCachedHook } = getHookReferences({ id, english });
 
     if (hasTranslation) {
       console.log('get translation from state');
-      this.setState(prevState => ({ ...prevState, language }));
+      this.addTranslationsData(language, translations);
     } else if (isCachedHook) {
       console.log('get translation from cache');
       this.startCachedTranslationSequence(id, language, english);
@@ -141,13 +165,13 @@ class Translate extends React.Component<Props, State> {
       if (translations[language]) {
         this.addTranslationsData(language, translations);
       } else {
-        throw new Error('Broken');
+        this.addWarningMessage(asyncMessages.cache['404']);
+        await this.startNewTranslationSequence(language, english);
       }
     } catch (error) {
       console.error(error);
-      this.addErrorMessage(
-        'We could not find a matching translation in our cache. Going off to translate you request on the server.'
-      );
+      this.addWarningMessage(asyncMessages.cache['500']);
+      await this.startNewTranslationSequence(language, english);
     }
   };
 
@@ -158,18 +182,29 @@ class Translate extends React.Component<Props, State> {
       if (translations[language]) {
         this.addTranslationsData(language, translations);
       } else {
-        throw new Error('Broken');
+        this.addErrorMessage(asyncMessages.server['404']);
       }
     } catch (error) {
       console.error(error);
-      this.addErrorMessage(
-        'We are having trouble translating you request on the server. Please try again latter.'
-      );
+      this.addErrorMessage(asyncMessages.server['500']);
     }
   };
 
   addErrorMessage = errorMessage =>
-    this.setState(prevState => ({ ...prevState, isLoading: false, errorMessage }));
+    this.setState(prevState => ({
+      ...prevState,
+      isLoading: false,
+      warningMessage: '',
+      errorMessage,
+    }));
+
+  addWarningMessage = warningMessage =>
+    this.setState(prevState => ({
+      ...prevState,
+      isLoading: false,
+      warningMessage,
+      errorMessage: '',
+    }));
 
   addTranslationsData = (language, translations) =>
     this.setState(prevState => ({
@@ -177,6 +212,7 @@ class Translate extends React.Component<Props, State> {
       language,
       isLoading: false,
       errorMessage: '',
+      warningMessage: '',
       translations: {
         ...prevState.translations,
         ...translations,
@@ -186,23 +222,37 @@ class Translate extends React.Component<Props, State> {
 
   render() {
     const { children, id, languages, english } = this.props;
-    const { language, translations, isLoading, errorMessage } = this.state;
+    const { language, translations, isLoading, errorMessage, warningMessage } = this.state;
     const translation = translations[language] || translations[englishSelectOption.code];
+    const hasBeenToServer = Object.keys(translations).length > 1;
+    const status =
+      (isLoading && 'validating') ||
+      (errorMessage && 'error') ||
+      (warningMessage && 'warning') ||
+      (hasBeenToServer && 'success');
 
     return (
       <div>
         <div>
-          <select value={language} onChange={this.handleSelectChange}>
-            {createSelectOptions(languages).map(({ name, code }) => (
-              <option key={code} value={code}>
-                {name}
-              </option>
-            ))}
-          </select>
-          {isLoading && <span>Loading</span>}
-          {errorMessage && <span>{errorMessage}</span>}
+          <Form style={{ maxWidth: '25rem' }} onSubmit={() => this.handleSelectChange(language)}>
+            <FormItem
+              hasFeedback
+              validateStatus={status || null}
+              help={errorMessage || warningMessage || null}
+            >
+              <Select
+                defaultValue={englishSelectOption.code}
+                value={language}
+                onChange={this.handleSelectChange}
+              >
+                {createSelectOptions(languages).map(({ name, code }) => (
+                  <Option value={code}>{name}</Option>
+                ))}
+              </Select>
+            </FormItem>
+          </Form>
         </div>
-        <hr />
+        <Divider />
         {children(translation)}
       </div>
     );

@@ -28,6 +28,7 @@
   "dependencies": {
     "@semantic-release/npm": "^3.2.5",
     "@types/jest": "^22.2.3",
+    "antd": "^3.6.6",
     "args": "^5.0.0",
     "axios": "^0.18.0",
     "clean-webpack-plugin": "^0.1.19",
@@ -38,6 +39,7 @@
     "glob": "^7.1.2",
     "jest": "^23.0.1",
     "react": "^16.4.1",
+    "react-dom": "^16.4.1",
     "semantic-release": "^15.4.1",
     "semantic-release-cli": "^4.0.1",
     "travis-deploy-once": "^5.0.0",
@@ -50,8 +52,10 @@
   "devDependencies": {
     "@types/react": "^16.4.5",
     "aws-sdk": "^2.264.1",
+    "css-loader": "^1.0.0",
     "jscodeshift": "^0.5.1",
     "shebang-loader": "0.0.1",
+    "style-loader": "^0.21.0",
     "tslint": "^5.10.0"
   },
   "config": {

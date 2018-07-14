@@ -35,6 +35,14 @@ const config = [
           use: 'ts-loader',
           include: dirSrc,
         },
+        {
+          test: /\.css$/,
+          use: ['style-loader', 'css-loader'],
+          // [
+          //   { loader: "style-loader" },
+          //   { loader: "css-loader" }
+          // ]
+        },
       ],
     },
 
