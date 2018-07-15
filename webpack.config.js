@@ -71,7 +71,7 @@ const config = [
           // new CleanWebpackPlugin(dirDist),
           new UglifyJSPlugin({ sourceMap: true }),
           new DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify(PRODUCTION_ENV) }),
-          new BundleAnalyzerPlugin(),
+          // new BundleAnalyzerPlugin(),
         ]
       : [],
   },

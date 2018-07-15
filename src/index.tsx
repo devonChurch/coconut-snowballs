@@ -60,6 +60,9 @@ const getHookReferences = ({ id, english }) => {
   return { cachedHook, currentHook, isCachedHook };
 };
 
+// White list the supplied language codes (from props) against our internal list
+// to make sure only "legitimate" languages are created as selectable options
+// (and are therefore targeted for things like server side translation).
 const createSelectOptions = (languages: Languages) => [
   englishSelectOption,
   ...allSelectOptions.reduce(
@@ -92,7 +95,11 @@ class Translate extends React.Component<Props, State> {
     const { cachedHook, currentHook } = getHookReferences({ id, english });
 
     if (!cachedHook) {
-      console.log('cache | componentDidMount');
+      // When a component VERY first loads on the page in the Styleguidist environment
+      // it is referencing the ORIGINAL cached "english" data set. In that regard
+      // we can take a snapshot of the data "key" /  "value" pairs and use that
+      // as a "hook" when figuring out if we are looking at "new" data (that is not
+      // cached) OR "cached" data (that has already been translated).
       cachedTranslations[id] = currentHook;
     }
   }
@@ -104,37 +111,39 @@ class Translate extends React.Component<Props, State> {
     const { isCachedHook } = getHookReferences({ id, english });
 
     if (hasTranslation) {
-      console.log('get translation from state');
       this.addTranslationsData(language, translations);
     } else if (isCachedHook) {
-      console.log('get translation from cache');
       this.startCachedTranslationSequence(id, language, english);
     } else {
-      console.log('get translation dynamicly');
       this.startNewTranslationSequence(language, english);
     }
   };
 
   startCachedTranslationSequence = async (id: Id, language: Language, english: Translation) => {
+    this.setState(prevState => ({ ...prevState, isLoading: true }));
     try {
-      this.setState(prevState => ({ ...prevState, isLoading: true }));
       const translations = await this.props.getCachedData(id);
       if (translations[language]) {
         this.addTranslationsData(language, translations);
       } else {
         this.addErrorMessage(errorMessages.cache['404']);
+        // If there is an issue getting "cached" data we can still move onto the
+        // server and make a "new" request for the same translation data.
         await this.startNewTranslationSequence(language, english);
       }
     } catch (error) {
       console.error(error);
       this.addErrorMessage(errorMessages.cache['500']);
+      // If the returned "cached" data does not have the requested language we can
+      // still move onto the server and make a "new" request for the same
+      // translation data.
       await this.startNewTranslationSequence(language, english);
     }
   };
 
   startNewTranslationSequence = async (language: Language, english: Translation) => {
+    this.setState(prevState => ({ ...prevState, isLoading: true }));
     try {
-      this.setState(prevState => ({ ...prevState, isLoading: true }));
       const translations = await this.props.makeNewTranslation(language, english);
       if (translations[language]) {
         this.addTranslationsData(language, translations);
@@ -184,9 +193,12 @@ class Translate extends React.Component<Props, State> {
                 defaultValue={englishSelectOption.code}
                 value={language}
                 onChange={this.handleSelectChange}
+                disabled={isLoading}
               >
                 {createSelectOptions(languages).map(({ name, code }) => (
-                  <Option value={code}>{name}</Option>
+                  <Option key={code} value={code}>
+                    {name}
+                  </Option>
                 ))}
               </Select>
             </FormItem>
