@@ -1,5 +1,8 @@
 const path = require('path');
+const { DefinePlugin } = require('webpack');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const PRODUCTION_ENV = 'production';
 const DEVELOPMENT_ENV = 'development';
 const { NODE_ENV = PRODUCTION_ENV } = process.env;
@@ -7,6 +10,8 @@ const isProduction = NODE_ENV === PRODUCTION_ENV;
 const dirDist = path.resolve(__dirname);
 const dirSrc = path.resolve(__dirname, 'src');
 const libraryName = 'coconutSnowballs';
+
+console.log({ nodeEnvironment: NODE_ENV });
 
 const config = [
   {
@@ -28,6 +33,21 @@ const config = [
 
     stats: isProduction ? 'normal' : 'errors-only',
 
+    externals: {
+      react: {
+        root: 'React',
+        commonjs2: 'react',
+        commonjs: 'react',
+        amd: 'react',
+      },
+      'react-dom': {
+        root: 'ReactDOM',
+        commonjs2: 'react-dom',
+        commonjs: 'react-dom',
+        amd: 'react-dom',
+      },
+    },
+
     module: {
       rules: [
         {
@@ -38,10 +58,6 @@ const config = [
         {
           test: /\.css$/,
           use: ['style-loader', 'css-loader'],
-          // [
-          //   { loader: "style-loader" },
-          //   { loader: "css-loader" }
-          // ]
         },
       ],
     },
@@ -50,7 +66,14 @@ const config = [
       extensions: ['.ts', '.tsx', '.js', '.jsx'],
     },
 
-    // plugins: [new CleanWebpackPlugin(dirDist)]
+    plugins: isProduction
+      ? [
+          // new CleanWebpackPlugin(dirDist),
+          new UglifyJSPlugin({ sourceMap: true }),
+          new DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify(PRODUCTION_ENV) }),
+          new BundleAnalyzerPlugin(),
+        ]
+      : [],
   },
 
   // {

@@ -8,8 +8,8 @@
   },
   "scripts": {
     "commit": "git-cz",
-    "build:development": "webpack",
-    "build:production": "webpack -p",
+    "build:development": "NODE_ENV=development webpack",
+    "build:production": "NODE_ENV=production webpack -p",
     "test": "jest",
     "deploy": "semantic-release",
     "semantic-release": "semantic-release",
@@ -37,8 +37,6 @@
     "fs-extra": "^6.0.1",
     "glob": "^7.1.2",
     "jest": "^23.0.1",
-    "react": "^16.4.1",
-    "react-dom": "^16.4.1",
     "semantic-release": "^15.4.1",
     "semantic-release-cli": "^4.0.1",
     "travis-deploy-once": "^5.0.0",
@@ -55,7 +53,13 @@
     "jscodeshift": "^0.5.1",
     "shebang-loader": "0.0.1",
     "style-loader": "^0.21.0",
-    "tslint": "^5.10.0"
+    "tslint": "^5.10.0",
+    "uglifyjs-webpack-plugin": "^1.2.7",
+    "webpack-bundle-analyzer": "^2.13.1"
+  },
+  "peerDependencies": {
+    "react": "^16.4.1",
+    "react-dom": "^16.4.1"
   },
   "config": {
     "commitizen": {
