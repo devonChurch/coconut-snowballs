@@ -30,7 +30,6 @@
     "@types/jest": "^22.2.3",
     "antd": "^3.6.6",
     "args": "^5.0.0",
-    "axios": "^0.18.0",
     "clean-webpack-plugin": "^0.1.19",
     "commitizen": "^2.9.6",
     "consola": "^1.4.1",
