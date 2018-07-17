@@ -38,6 +38,11 @@ interface State {
   errorMessage: ErrorMessage;
 }
 
+interface SelectOption {
+  code: string;
+  name: string;
+}
+
 const cachedTranslations = {};
 
 const englishSelectOption = { code: 'en', name: 'English' }; // English
@@ -66,7 +71,8 @@ const getHookReferences = ({ id, english }) => {
 const createSelectOptions = (languages: Languages) => [
   englishSelectOption,
   ...allSelectOptions.reduce(
-    (acc, { code, name }) => (languages.includes(code) ? [...acc, { code, name }] : acc),
+    (acc: SelectOption[], { code, name }) =>
+      languages.includes(code) ? [...acc, { code, name }] : acc,
     []
   ),
 ];
@@ -177,7 +183,7 @@ class Translate extends React.Component<Props, State> {
     }));
 
   render() {
-    const { children, id, languages, english } = this.props;
+    const { children, languages } = this.props;
     const { language, translations, isLoading, errorMessage } = this.state;
     const translation = translations[language] || translations[englishSelectOption.code];
     const hasBeenToServer = Object.keys(translations).length > 1;
@@ -188,11 +194,24 @@ class Translate extends React.Component<Props, State> {
       <div>
         <div>
           <Form style={{ maxWidth: '25rem' }} onSubmit={() => this.handleSelectChange(language)}>
-            <FormItem hasFeedback validateStatus={status || null} help={errorMessage || null}>
+            <FormItem
+              hasFeedback
+              validateStatus={status || undefined}
+              help={errorMessage || undefined}
+            >
               <Select
                 defaultValue={englishSelectOption.code}
                 value={language}
-                onChange={this.handleSelectChange}
+                onChange={value => {
+                  // The Antd Typescript definition references
+                  // `string | string[] | number | number[]` as the function argument.
+                  // In that regard we need to test that we are looking at a string
+                  // (which we will be every time) before processing the request
+                  // because we have set Typescript into "strict" mode.
+                  if (typeof value === 'string') {
+                    this.handleSelectChange(value);
+                  }
+                }}
                 disabled={isLoading}
               >
                 {createSelectOptions(languages).map(({ name, code }) => (
