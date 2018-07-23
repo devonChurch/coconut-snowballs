@@ -1,88 +1,63 @@
-const jscodeshift = require("jscodeshift");
+module.exports = class ParseExampleAttributes {
+  constructor({ jscodeshift, logger }) {
+    this.jscodeshift = jscodeshift;
+    this.logger = logger;
+  }
 
-const parseId = path => path.value.value.value;
+  parseId = path => path.value.value.value;
 
-const parseLanguage = path =>
-  path.value.value.expression.elements.map(({ value }) => value);
+  parseLanguage = path => path.value.value.expression.elements.map(({ value }) => value);
 
-const parseEnglish = path => {
-  const createAwaitFunction = path =>
-    jscodeshift(path).replaceWith(
-      jscodeshift.awaitExpression(
-        jscodeshift.callExpression(jscodeshift.identifier("translate"), [
-          jscodeshift.literal(path.value.value)
-        ])
-      )
-    );
+  parseEnglish = path => {
+    const createAwaitFunction = path =>
+      this.jscodeshift(path).replaceWith(
+        this.jscodeshift.awaitExpression(
+          this.jscodeshift.callExpression(this.jscodeshift.identifier('translate'), [
+            this.jscodeshift.literal(path.value.value),
+          ])
+        )
+      );
 
-  const expression = jscodeshift(path.value.value.expression)
-    .find(jscodeshift.Literal)
-    .forEach(createAwaitFunction)
-    .toSource();
+    const expression = this.jscodeshift(path.value.value.expression)
+      .find(this.jscodeshift.Literal)
+      .forEach(createAwaitFunction)
+      .toSource();
 
-  return eval(`async translate => (${expression});`);
+    return eval(`async translate => (${expression});`);
+  };
+
+  parseAttributes = markdownExample => {
+    let id, languages, english;
+
+    this.jscodeshift(markdownExample)
+      .findJSXElements('Translate')
+      .find(this.jscodeshift.JSXAttribute)
+      .forEach(path => {
+        const { name } = path.value.name;
+
+        if (name === 'id') id = this.parseId(path);
+        if (name === 'languages') languages = this.parseLanguage(path);
+        if (name === 'english') english = this.parseEnglish(path);
+      });
+
+    return { id, languages, english };
+  };
+
+  validateAttributes = ({ id, languages, english }) => {
+    const isValid = id && languages && english;
+    const isAllInvalid = !id && !languages && !english;
+
+    if (isAllInvalid) this.logger.warn('no translation sequence extracted');
+    else if (!isValid && !id) this.logger.error('could not extract id prop');
+    else if (!isValid && !languages) this.logger.error('could not extract languages prop');
+    else if (!isValid && !english) this.logger.error('could not extract english prop');
+
+    return isValid;
+  };
+
+  init = markdownExample => {
+    const attributes = this.parseAttributes(markdownExample);
+    const isValid = this.validateAttributes(attributes);
+    return isValid ? attributes : null;
+  };
 };
-
-module.exports = example => {
-  let id, languages, english;
-
-  jscodeshift(example)
-    .findJSXElements("Translate")
-    .find(jscodeshift.JSXAttribute)
-    .forEach(path => {
-      const { name } = path.value.name;
-
-      if (name === "id") {
-        id = parseId(path);
-      } else if (name === "languages") {
-        languages = parseLanguage(path);
-      } else if (name === "english") {
-        english = parseEnglish(path);
-      }
-    });
-
-  return { id, languages, english };
-};
-
-// - - - - - - - - - - - - - - - - - - - -
-/*
-<Translate
-  id="1a2b3c"
-  languages={['ab', 'cd']}
-  english={{
-    title: 'Hello',
-    description: 'This is an example',
-    button: 'Click here!',
-  }}
->
-({ title, description, button }) => (
-  <div>
-    <h2>{title}</h2>
-    <p>{description}</p>
-    <button>{button}</button>
-  </div>
-);
-</Translate>
-*/
-// - - - - - - - - - - - - - - - - - - - -
-
-// module.exports = example => {
-//   // console.log("example", example);
-
-//   return jscodeshift(example)
-//     .find(jscodeshift.Literal)
-//     .forEach(path => {
-//       // console.log({ ...path });
-
-//       const { value } = path.value;
-
-//       jscodeshift(path).replaceWith(
-//         jscodeshift.awaitExpression(
-//           jscodeshift.callExpression(jscodeshift.identifier("translate"), [
-//             jscodeshift.literal(value)
-//           ])
-//         )
-//       );
-//     })
-//     .toSource();
-// };

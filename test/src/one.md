@@ -5,7 +5,7 @@ asdas dasda dasdasdad
   id="1a2b3c"
   languages={['de', 'fr']}
   english={{
-    title: 'Hello',
+    title: 'Goodbye',
     description: 'This is an example',
     button: 'Click here!',
   }}

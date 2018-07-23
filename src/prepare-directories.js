@@ -13,15 +13,15 @@ module.exports = class PrepareDirectories {
   });
 
   valadateDirs = ({ markdownDir, styleguidistDir }) => {
-    markdownDir && this.logger.log(`markdown directory = ${markdownDir}`);
-    styleguidistDir && this.logger.log(`styleguidist directory = ${styleguidistDir}`);
+    markdownDir && this.logger.info(`markdown directory = ${markdownDir}`);
+    styleguidistDir && this.logger.info(`styleguidist directory = ${styleguidistDir}`);
     if (!markdownDir || !styleguidistDir) throw new Error();
   };
 
   cleanTranslationsDir = ({ translationsDir }) => this.emptyDirAsync(translationsDir);
 
-  init = async flags => {
-    const dirs = this.getDirs(flags);
+  init = async cliFlags => {
+    const dirs = this.getDirs(cliFlags);
     this.valadateDirs(dirs);
     await this.cleanTranslationsDir(dirs);
     return dirs;

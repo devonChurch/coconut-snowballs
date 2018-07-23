@@ -1,8 +1,27 @@
-module.exports = data => {
-  const matches = data.match(/(```)(.|\n)*?(```)/g);
+module.exports = class ExtractMarkdownExamples {
+  constructor({ logger }) {
+    this.logger = logger;
+  }
 
-  return (matches || []).map(match => {
-    const lines = match.split("\n").filter(line => !/```/.test(line));
-    return lines.join("\n");
-  });
+  getExamples = markdownContent => {
+    const matches = markdownContent.match(/(```)(.|\n)*?(```)/g);
+
+    return (matches || []).map(match =>
+      match
+        .split('\n')
+        .filter(line => !/```/.test(line))
+        .join('\n')
+    );
+  };
+
+  validateExamples = markdownExamples =>
+    markdownExamples.length
+      ? this.logger.info(`found ${markdownExamples.length} markdown examples`)
+      : this.logger.warn('no code examples found');
+
+  init = markdownContent => {
+    const markdownExamples = this.getExamples(markdownContent);
+    this.validateExamples(markdownExamples);
+    return markdownExamples;
+  };
 };

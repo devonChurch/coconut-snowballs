@@ -28,8 +28,8 @@ module.exports = class GetCliParams {
 
   init = () => {
     this.setupArgs();
-    const flags = this.getArgs();
-    this.validateArgs(flags);
-    return flags;
+    const cliFlags = this.getArgs();
+    this.validateArgs(cliFlags);
+    return cliFlags;
   };
 };

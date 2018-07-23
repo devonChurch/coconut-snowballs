@@ -12,30 +12,36 @@
 // const writeFileAsync = promisify(fs.writeFile);
 // const logger = require('consola').withScope('translation');
 
+// const translate = new AWS.Translate({ apiVersion: "2017-07-01" });
+
 const args = require('args');
 const { promisify } = require('util');
 const path = require('path');
 const fs = require('fs-extra');
 const consola = require('consola').default;
 const glob = require('glob');
-// debugger;
-// console.log(consola);
+const jscodeshift = require('jscodeshift');
+const AWS = require('aws-sdk');
+//
+AWS.config.region = 'us-east-1';
 //
 const { argv, cwd } = process;
 const { emptyDir: emptyDirAsync, readFile, readdir, writeFile } = fs;
+const curentDir = cwd();
 const globAsync = promisify(glob);
 const readFileAsync = promisify(readFile);
-const readdirAsync = promisify(readdir);
 const writeFileAsync = promisify(writeFile);
 const logger = consola.withScope('translation');
+const awsTranslate = new AWS.Translate({ apiVersion: '2017-07-01' });
 //
 const GetCliParams = require('./get-cli-params');
 const PrepareDirectories = require('./prepare-directories');
 const FindMarkdownFiles = require('./find-markdown-files');
-// const readMarkdownData = require('./read-markdown-data');
-// const extractMarkdownExamples = require('./extract-markdown-examples');
-// const parseExampleAttributes = require('./parse-example-attributes');
-// const createTranslator = require('./create-translator');
+const ReadMarkdownContent = require('./read-markdown-content');
+const ExtractMarkdownExamples = require('./extract-markdown-examples');
+const ParseExampleAttributes = require('./parse-example-attributes');
+const MakeTranslation = require('./make-translation');
+const SaveTranslation = require('./save-translation');
 // const newLine = () => console.log('\n');
 
 // logger.fatal("this is a fatal message");
@@ -50,155 +56,66 @@ const FindMarkdownFiles = require('./find-markdown-files');
 // logger.trace("this is a trace message");
 
 const getCliParams = new GetCliParams({ args, argv, logger });
-const prepareDirectories = new PrepareDirectories({
-  path,
-  curentDir: cwd(),
-  emptyDirAsync,
-  logger,
-});
+const prepareDirectories = new PrepareDirectories({ path, curentDir, emptyDirAsync, logger });
 const findMarkdownFiles = new FindMarkdownFiles({ globAsync, logger });
+const readMarkdownContent = new ReadMarkdownContent({ readFileAsync, logger });
+const extractMarkdownExamples = new ExtractMarkdownExamples({ logger });
+const parseExampleAttributes = new ParseExampleAttributes({ jscodeshift, logger });
+const makeTranslation = new MakeTranslation({ awsTranslate, logger });
+const saveTranslation = new SaveTranslation({ writeFileAsync, logger });
 
 (async () => {
   try {
     logger.start('starting translation sequence');
-    const flags = getCliParams.init();
-    const { markdownDir, styleguidistDir, translationsDir } = await prepareDirectories.init(flags);
-    const files = findMarkdownFiles.init(markdownDir);
 
-    console.log('*** DONE');
+    //
+    //
+    const cliFlags = getCliParams.init();
+
+    //
+    //
+    const { markdownDir, translationsDir } = await prepareDirectories.init(cliFlags);
+
+    //
+    //
+    const markdownFiles = await findMarkdownFiles.init(markdownDir);
+
+    //
+    //
+    const markdownContents = await Promise.all(
+      markdownFiles.map(markdownFile => readMarkdownContent.init(markdownFile))
+    );
+
+    //
+    //
+    const markdownExamples = await Promise.all(
+      markdownContents.map(markdownContent => extractMarkdownExamples.init(markdownContent))
+    );
+
+    //
+    //
+    const exampleAttributes = markdownExamples
+      .reduce((acc, examples) => [...acc, ...examples], [])
+      .map(markdownExample => parseExampleAttributes.init(markdownExample))
+      .filter(attributes => attributes);
+
+    //
+    //
+    const translations = await Promise.all(
+      exampleAttributes.map(example => makeTranslation.init(example))
+    );
+
+    //
+    //
+    const savedFiles = await Promise.all(
+      translations.map(translation => saveTranslation.init({ ...translation, translationsDir }))
+    );
+
+    //
+    //
+    const totalSaves = savedFiles.length;
+    logger.success(`saved ${totalSaves} files${totalSaves === 1 ? '' : 's'}`);
   } catch (error) {
-    console.log('*** ERROR');
-    console.log(error);
+    logger.fatal(JSON.stringify(error, null, 2));
   }
 })();
-
-// (async () => {
-//   try {
-//     logger.start('starting translation sequence');
-
-//     args
-//       .option(
-//         'markdown', //
-//         'The root directory where your documentation lives'
-//       )
-//       .option(
-//         'styleguidist', //
-//         'root directory where the generated styleguidist index.html lives'
-//       );
-
-//     const { markdown: markdownFlag, styleguidist: styleguidistFlag } = args.parse(process.argv);
-
-//     !markdownFlag && logger.error('--markdown flag must be supplied');
-//     !styleguidistFlag && logger.error('--styleguidist flag must be supplied');
-
-//     if (!markdownFlag && !styleguidistFlag) return;
-
-//     const curentDir = process.cwd();
-//     const markdownDir = path.resolve(curentDir, markdownFlag);
-//     const styleguidistDir = path.resolve(curentDir, styleguidistFlag);
-//     const translationsDir = path.resolve(curentDir, styleguidistFlag, 'translations');
-//     await emptyDirAsync(translationsDir);
-
-//     logger.ready('cli parameters are present');
-//     logger.log(`markdown directory = ${markdownDir}`);
-//     logger.log(`styleguidist directory = ${styleguidistDir}`);
-
-//     //
-//     newLine() || logger.start('find markdown files');
-//     const markdownFiles = await findMarkdownFiles(markdownDir);
-//     if (!markdownFiles.length) return logger.warn('no markdown files found');
-//     logger.success(`found ${markdownFiles.length} markdown files`);
-//     markdownFiles.forEach(file => logger.log(file));
-//     //
-//     for (markdownFile of markdownFiles) {
-//       //
-//       newLine() || logger.start(`extract code examples from ${markdownFile}`);
-//       const markdownData = await readMarkdownData(markdownFile);
-//       logger.ready('got markdown data');
-//       const markdownExamples = extractMarkdownExamples(markdownData);
-//       if (!markdownExamples.length) {
-//         logger.warn('no code examples found');
-//         continue;
-//       }
-
-//       logger.info(`found ${markdownExamples.length} markdown examples`);
-//       //
-//       for (markdownExample of markdownExamples) {
-//         //
-//         const { id, languages, english } = parseExampleAttributes(markdownExample);
-//         if (!id && !languages && !english) {
-//           logger.warn('no translation sequence extracted');
-//           continue;
-//         } else if (!id) {
-//           logger.error('could not extract id prop');
-//           continue;
-//         } else if (!languages) {
-//           logger.error('could not extract languages prop');
-//           continue;
-//         } else if (!english) {
-//           logger.error('could not extract english prop');
-//           continue;
-//         }
-//         let translations = {};
-//         for (language of languages) {
-//           const translator = createTranslator(language);
-//           const translation = await english(translator);
-//           // console.log(translation);
-//           translations = {
-//             ...translations,
-//             [language]: translation,
-//           };
-//         }
-//         console.log(translations);
-//         await writeFileAsync(`${translationsDir}/${id}.json`, JSON.stringify(translations), 'utf8');
-//       }
-//     }
-//   } catch (error) {
-//     logger.error(error);
-//   }
-// })();
-
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-// (() => {
-//     console.log("RUNNING!");
-// })();
-
-// try {
-//   if (!flags.markdown) {
-//     throw "--markdown flag must be supplied";
-//   }
-
-//   if (!flags.styleguidist) {
-//     throw "--styleguidist flag must be supplied";
-//   }
-// } catch (error) {
-//   console.error(error);
-// }
-
-/*
-const filesDir = path.resolve(curentDir, "files");
-const say = message =>
-  new Promise(resolve => {
-    setTimeout(() => resolve(`completed | ${message}`), Math.random() * 5);
-  });
-
-(async () => {
-  const files = await readdirAsync(filesDir);
-
-  for (file of files) {
-    const foo = require(`${filesDir}/${file}`);
-    const message = await foo(say);
-    console.log(message);
-  }
-})();
-*/

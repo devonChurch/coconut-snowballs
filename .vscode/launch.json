@@ -15,6 +15,7 @@
       "type": "node",
       "request": "launch",
       "name": "Launch Program",
+      "sourceMaps": true,
       "program": "${workspaceFolder}/cli.js",
       "args": [ "--markdown='./test'", "--styleguidist='./public'" ]
     }

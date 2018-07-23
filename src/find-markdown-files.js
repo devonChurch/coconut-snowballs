@@ -6,13 +6,18 @@ module.exports = class FindMarkdownFiles {
 
   getFiles = markdownDir => this.globAsync(`${markdownDir}/**/*.md`, null);
 
-  validateFiles = files => {
-    if (!files.length) return this.logger.warn('no markdown files found');
-    this.logger.success(`found ${files.length} markdown files`);
-    files.forEach(file => this.logger.log(file));
+  validateFiles = markdownFiles => {
+    if (!markdownFiles.length) {
+      this.logger.warn('no markdown files found');
+      throw new Error();
+    }
+    this.logger.success(`found ${markdownFiles.length} markdown files`);
+    markdownFiles.forEach(file => this.logger.info(file));
   };
 
   init = async markdownDir => {
-    return await this.getFiles(markdownDir);
+    const markdownFiles = await this.getFiles(markdownDir);
+    this.validateFiles(markdownFiles);
+    return markdownFiles.length ? markdownFiles : [];
   };
 };
