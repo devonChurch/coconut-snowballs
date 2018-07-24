@@ -4,6 +4,14 @@ module.exports = class MakeTranslation {
     this.logger = logger;
   }
 
+  // AWS Translation response.
+  // ```
+  // {
+  //   "TranslatedText": "Bonjour",
+  //   "SourceLanguageCode": "en",
+  //   "TargetLanguageCode": "fr"
+  // }
+  // ```
   createTranslator = language => content =>
     new Promise((resolve, reject) =>
       this.awsTranslate.translateText(
@@ -39,9 +47,3 @@ module.exports = class MakeTranslation {
     return { id, translations };
   };
 };
-
-// {
-//   "TranslatedText": "Bonjour",
-//   "SourceLanguageCode": "en",
-//   "TargetLanguageCode": "fr"
-// }

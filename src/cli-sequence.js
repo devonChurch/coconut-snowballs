@@ -1,19 +1,3 @@
-// (async () => {
-//   console.log('Hello world');
-// })();
-
-// const args = require('args');
-// const { promisify } = require('util');
-// const path = require('path');
-// const fs = require('fs-extra');
-// const { emptyDir: emptyDirAsync } = fs;
-// const readFileAsync = promisify(fs.readFile);
-// const readdirAsync = promisify(fs.readdir);
-// const writeFileAsync = promisify(fs.writeFile);
-// const logger = require('consola').withScope('translation');
-
-// const translate = new AWS.Translate({ apiVersion: "2017-07-01" });
-
 const args = require('args');
 const { promisify } = require('util');
 const path = require('path');
@@ -26,7 +10,7 @@ const AWS = require('aws-sdk');
 AWS.config.region = 'us-east-1';
 //
 const { argv, cwd } = process;
-const { emptyDir: emptyDirAsync, readFile, readdir, writeFile } = fs;
+const { emptyDir: emptyDirAsync, readFile, writeFile } = fs;
 const curentDir = cwd();
 const globAsync = promisify(glob);
 const readFileAsync = promisify(readFile);
@@ -42,19 +26,7 @@ const ExtractMarkdownExamples = require('./extract-markdown-examples');
 const ParseExampleAttributes = require('./parse-example-attributes');
 const MakeTranslation = require('./make-translation');
 const SaveTranslation = require('./save-translation');
-// const newLine = () => console.log('\n');
-
-// logger.fatal("this is a fatal message");
-// logger.error("this is a error message");
-// logger.warn("this is a warn message");
-// logger.log("this is a log message");
-// logger.info("this is a info message");
-// logger.start("this is a start message");
-// logger.success("this is a success message");
-// logger.ready("this is a ready message");
-// logger.debug("this is a debug message");
-// logger.trace("this is a trace message");
-
+//
 const getCliParams = new GetCliParams({ args, argv, logger });
 const prepareDirectories = new PrepareDirectories({ path, curentDir, emptyDirAsync, logger });
 const findMarkdownFiles = new FindMarkdownFiles({ globAsync, logger });
@@ -68,51 +40,42 @@ const saveTranslation = new SaveTranslation({ writeFileAsync, logger });
   try {
     logger.start('starting translation sequence');
 
-    //
-    //
+    // Extract / validate the user supplied CLI flags for the `/src` and `/dist` directories.
     const cliFlags = getCliParams.init();
 
-    //
-    //
+    // Create absolute paths to the `/src` and `/dist` directories.
     const { markdownDir, translationsDir } = await prepareDirectories.init(cliFlags);
 
-    //
-    //
+    // Generate a "glob" and get references to ALL Markdown (.md) files located
+    // under the `/src` directory.
     const markdownFiles = await findMarkdownFiles.init(markdownDir);
 
-    //
-    //
+    // Convert Markdown file data into usable strings.
     const markdownContents = await Promise.all(
       markdownFiles.map(markdownFile => readMarkdownContent.init(markdownFile))
     );
 
-    //
-    //
+    // Extract code example(s) from within each Markdown files data.
     const markdownExamples = await Promise.all(
       markdownContents.map(markdownContent => extractMarkdownExamples.init(markdownContent))
     );
 
-    //
-    //
+    // Parse each code example into a set of attributes.
     const exampleAttributes = markdownExamples
       .reduce((acc, examples) => [...acc, ...examples], [])
       .map(markdownExample => parseExampleAttributes.init(markdownExample))
       .filter(attributes => attributes);
 
-    //
-    //
+    // Translate each code example into the supplied language(s)/
     const translations = await Promise.all(
       exampleAttributes.map(example => makeTranslation.init(example))
     );
 
-    //
-    //
+    // Save each translated cached data set into the `/src` directory with the `id` as the file name.
     const savedFiles = await Promise.all(
       translations.map(translation => saveTranslation.init({ ...translation, translationsDir }))
     );
 
-    //
-    //
     const totalSaves = savedFiles.length;
     logger.success(`saved ${totalSaves} files${totalSaves === 1 ? '' : 's'}`);
   } catch (error) {
