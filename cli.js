@@ -1,4 +1,5 @@
 #!/usr/bin/env node
 
-// require('./src/cli-sequence');
+// This is a hook that loads in the transpired CLI sequence.
+// DO NOT DELETE!
 require('./cli-sequence');
