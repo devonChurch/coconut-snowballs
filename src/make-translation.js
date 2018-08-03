@@ -24,7 +24,7 @@ module.exports = class MakeTranslation {
       )
     );
 
-  init = async ({ id, languages, english }) => {
+  init = async ({ languages, english, ...params }) => {
     let translations = {};
 
     for (const language of languages) {
@@ -44,6 +44,6 @@ module.exports = class MakeTranslation {
       }
     }
 
-    return { id, translations };
+    return { ...params, translations };
   };
 };

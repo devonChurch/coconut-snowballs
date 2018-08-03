@@ -31,17 +31,16 @@ module.exports = class ParseExampleAttributes {
   // });
   // ```
   parseEnglish = path => {
+    const { jscodeshift: j } = this;
     const createAwaitFunction = path =>
-      this.jscodeshift(path).replaceWith(
-        this.jscodeshift.awaitExpression(
-          this.jscodeshift.callExpression(this.jscodeshift.identifier('translate'), [
-            this.jscodeshift.literal(path.value.value),
-          ])
+      j(path).replaceWith(
+        j.awaitExpression(
+          j.callExpression(j.identifier('translate'), [j.literal(path.value.value)])
         )
       );
 
-    const expression = this.jscodeshift(path.value.value.expression)
-      .find(this.jscodeshift.Literal)
+    const expression = j(path.value.value.expression)
+      .find(j.Literal)
       .forEach(createAwaitFunction)
       .toSource();
 
@@ -49,11 +48,12 @@ module.exports = class ParseExampleAttributes {
   };
 
   parseAttributes = markdownExample => {
+    const { jscodeshift: j } = this;
     let id, languages, english;
 
-    this.jscodeshift(markdownExample)
+    j(markdownExample)
       .findJSXElements('Translate')
-      .find(this.jscodeshift.JSXAttribute)
+      .find(j.JSXAttribute)
       .forEach(path => {
         const { name } = path.value.name;
 
@@ -83,3 +83,152 @@ module.exports = class ParseExampleAttributes {
     return isValid ? attributes : null;
   };
 };
+
+/*
+// Press ctrl+space for code completion
+export default function transformer(file, api) {
+  const j = api.jscodeshift;
+  
+  // console.log(file.source)
+  const tempFileData1 = `
+const english = ${JSON.stringify({
+  one: '1',
+  two: '2',
+  three: '3'
+})};
+	`;
+  
+  const tempFileData2 = `
+const english = {
+  one: '1',
+  two: '2',
+  three: '3'
+};
+	`;
+
+  console.dir(j)
+  console.log(tempFileData1);
+  
+  return j(tempFileData1)
+    .find(j.Property)
+    .forEach(path => {
+      console.log(path)
+        path.value.key.type = 'Identifier';
+	    path.value.key.name = path.value.key.value;
+        
+      // j(path).replaceWith(
+        // j.property(
+        	// j.identifier('hello'),
+            // [j.literal('world')]
+        // )
+      // );
+    })
+    .toSource();
+}
+
+*/
+
+// -- - - - - - - -
+
+/*
+// Press ctrl+space for code completion
+export default function transformer(file, api) {
+  const j = api.jscodeshift;
+  
+  // console.log(file.source)
+  const tempFileData1 = `
+const english = ${JSON.stringify({
+  one: '1',
+  two: '2',
+  'three': ['3', 'three', '3.0.0']
+})};
+	`;
+  
+  const tempFileData2 = `
+const english = {
+  one: '1',
+  two: {0: 'apple', 1: 'banana'},
+  'three': ['3', 'three', '3.0.0']
+};
+	`;
+  
+  const tempFileData3 = `
+async () => (${JSON.stringify({
+  one: '1',
+  two: '2',
+  'three': ['3', 'three', '3.0.0']
+})});
+	`;
+
+  console.dir(j)
+  console.log(tempFileData1);
+  console.log(j(tempFileData1));
+  console.log('object?', 
+    j(tempFileData1)
+    	.find(j.ObjectExpression).__paths[0]
+              // .toSource()
+  );
+  
+  const translationData = j(
+  	j(tempFileData1)
+      .find(j.ObjectExpression)
+      .__paths[0]
+  ).toSource();
+  
+  console.log('wrapper', translationData);
+  
+  const asyncWrapper = `async () => (${translationData})`
+  
+  const litteralTransformation = j(tempFileData3)
+  // const litteralTransformation = j(asyncWrapper)
+    .find(j.Property)
+    .forEach(path => {
+      console.log(path)
+        path.value.key.type = 'Identifier';
+	    path.value.key.name = path.value.key.value;
+      
+        j(path.value)
+      		.find(j.Literal)
+      		.forEach(path => {
+        
+              j(path).replaceWith(
+                j.awaitExpression(
+                  j.callExpression(j.identifier('translate'), [
+                    j.literal(path.value.value),
+                  ])
+                )
+              );
+          
+        	});
+
+    })
+  	.toSource();
+  
+  	console.log(j(litteralTransformation));
+
+    return litteralTransformation;
+  
+    // AwaitExpression
+  
+
+    .forEach(path => {
+    	console.log(path)
+      j(path).replaceWith(
+        j.awaitExpression(
+          j.callExpression(j.identifier('translate'), [
+            j.literal(path.value.value),
+          ])
+        )
+      );
+    })
+    // .toSource();
+  
+  // return j(withIdentifiers)
+  	// .find(j.Identifier)
+  	// .forEach(path => {
+  	// 	console.log(path);
+  	// })
+  	// .toSource();
+  }
+
+*/
