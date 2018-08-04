@@ -3,6 +3,7 @@ const { DefinePlugin } = require('webpack');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+const consola = require('consola');
 const PRODUCTION_ENV = 'production';
 const DEVELOPMENT_ENV = 'development';
 const { NODE_ENV = PRODUCTION_ENV } = process.env;
@@ -10,8 +11,9 @@ const isProduction = NODE_ENV === PRODUCTION_ENV;
 const dirDist = path.resolve(__dirname);
 const dirSrc = path.resolve(__dirname, 'src');
 const libraryName = 'coconutSnowballs';
+const logger = consola.withScope('translation');
 
-console.log({ nodeEnvironment: NODE_ENV });
+logger.start({ nodeEnvironment: NODE_ENV });
 
 module.exports = [
   {
@@ -87,7 +89,7 @@ module.exports = [
       output: {
         path: dirDist,
         filename: `${name}.js`,
-        libraryTarget: 'commonjs',
+        libraryTarget: 'umd',
       },
 
       devtool: isProduction ? 'source-map' : 'cheap-source-map',
@@ -109,10 +111,6 @@ module.exports = [
       },
     });
 
-    return [
-      createNodeConfig('cli-sequence'),
-      createNodeConfig('parse-json-data'),
-      createNodeConfig('make-translation'),
-    ];
+    return [createNodeConfig('cli-sequence'), createNodeConfig('json-sequence')];
   })(),
 ];
