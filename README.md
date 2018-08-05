@@ -1,6 +1,6 @@
 # Coconut Snowballs :chestnut: :snowman: :8ball:
 
-[![Build Status](https://travis-ci.org/devonChurch/coconut-snowballs.svg?branch=master)](https://travis-ci.org/devonChurch/coconut-snowballs) [![npm version](https://badge.fury.io/js/coconut-snowballs.svg)](https://badge.fury.io/js/coconut-snowballs)
+[![Build Status](https://travis-ci.com/devonChurch/coconut-snowballs.svg?branch=master)](https://travis-ci.com/devonChurch/coconut-snowballs) [![npm version](https://badge.fury.io/js/coconut-snowballs.svg)](https://badge.fury.io/js/coconut-snowballs)
 
 [![typescript](https://user-images.githubusercontent.com/15273233/40872275-a61d4660-669f-11e8-8edf-860f1947759f.png)](https://www.typescriptlang.org/) [![code style prettier](https://img.shields.io/badge/code_style-prettier-FF69A4.svg)](https://prettier.io/)
 
