@@ -16,7 +16,11 @@ module.exports = class ExtractMarkdownExamples {
 
   validateExamples = markdownExamples =>
     markdownExamples.length
-      ? this.logger.info(`found ${markdownExamples.length} markdown examples`)
+      ? this.logger.info(
+          `found ${markdownExamples.length} markdown example${
+            markdownExamples.length === 1 ? '' : 's'
+          }`
+        )
       : this.logger.warn('no code examples found');
 
   init = markdownContent => {

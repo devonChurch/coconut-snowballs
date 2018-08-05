@@ -11,7 +11,9 @@ module.exports = class FindMarkdownFiles {
       this.logger.warn('no markdown files found');
       throw new Error();
     }
-    this.logger.success(`found ${markdownFiles.length} markdown files`);
+    this.logger.success(
+      `found ${markdownFiles.length} markdown file${markdownFiles.length === 1 ? '' : 's'}`
+    );
     markdownFiles.forEach(file => this.logger.info(file));
   };
 

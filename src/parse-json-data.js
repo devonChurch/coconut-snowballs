@@ -38,8 +38,6 @@ module.exports = class ParseJsonData {
   // });
   // ```
   parseJson = json => {
-    debugger;
-    console.log('parseJson', json);
     const { jscodeshift: j } = this;
     const asyncWrapper = `async translate => (${json})`;
 

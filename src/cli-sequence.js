@@ -77,7 +77,7 @@ const saveTranslation = new SaveTranslation({ writeFileAsync, logger });
     );
 
     const totalSaves = savedFiles.length;
-    logger.success(`saved ${totalSaves} files${totalSaves === 1 ? '' : 's'}`);
+    logger.success(`saved ${totalSaves} file${totalSaves === 1 ? '' : 's'}`);
   } catch (error) {
     logger.fatal(JSON.stringify(error, null, 2));
   }
