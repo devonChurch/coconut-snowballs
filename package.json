@@ -1,6 +1,6 @@
 {
   "name": "coconut-snowballs",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A build / component level translation system for React Styleguidist",
   "keywords": [
     "translatie",
@@ -43,6 +43,7 @@
     "fs-extra": "^6.0.1",
     "glob": "^7.1.2",
     "jest": "^23.0.1",
+    "npm": "^6.6.0",
     "ts-jest": "^22.4.6",
     "ts-loader": "^4.3.0",
     "typescript": "^2.8.3",
