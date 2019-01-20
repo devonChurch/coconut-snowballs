@@ -1,6 +1,6 @@
 {
   "name": "coconut-snowballs",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A build / component level translation system for React Styleguidist",
   "keywords": [
     "translatie",
