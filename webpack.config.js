@@ -13,7 +13,7 @@ const dirSrc = path.resolve(__dirname, 'src');
 const libraryName = 'coconutSnowballs';
 const logger = consola.withScope('translation');
 
-logger.start({ nodeEnvironment: NODE_ENV });
+logger.start(NODE_ENV);
 
 module.exports = [
   {
