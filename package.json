@@ -2,6 +2,15 @@
   "name": "coconut-snowballs",
   "version": "1.0.0",
   "description": "A build / component level translation system for React Styleguidist",
+  "keywords": [
+    "translatie",
+    "translation",
+    "internationalisation",
+    "AWS",
+    "react",
+    "reactjs",
+    "styleguidist"
+  ],
   "main": "index.js",
   "bin": {
     "coconut-snowballs": "./cli.js"
